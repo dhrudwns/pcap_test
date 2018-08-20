@@ -18,9 +18,18 @@ struct Data
 u_int8_t protocol, len;
 u_int16_t t_len, type;
 
+void usage() {
+	printf("syntax: pcap_test <interface>\n");
+	printf("sample: pcap_test wlan0\n");
+}
+
 int main(int argc, char* argv[]) {
+	if(argc != 2) {
+		usage();
+		return -1;
+	}
   
-  char dev[] = "eth0"; 
+  char * dev = argv[1]; 
   char errbuf[PCAP_ERRBUF_SIZE];
   pcap_t* handle = pcap_open_live(dev, BUFSIZ, 1, 1000, errbuf);
   if (handle == NULL) {
@@ -34,6 +43,7 @@ int main(int argc, char* argv[]) {
     int res = pcap_next_ex(handle, &header, &packet);
     if (res == 0) continue;
     if (res == -1 || res == -2) break;
+    printf("%u bytes captured\n", header->caplen);
    /* for(i=0; i<header->len; i++){
 	    if(i%16==0) printf("\n");
 	    printf("%02x ", *(packet++));
@@ -86,14 +96,17 @@ void PrintTcp_H(const u_char* packet){
 	tcph = (tcp_hdr *)packet;
 	t_len=tcph->th_off;
 	printf("\n===== TCP Header =====\n");
-	printf("Src port : %u\n", tcph->th_sport);
-	printf("Dst port : %u\n", tcph->th_dport);
+	printf("Src port : %d\n", ntohs(tcph->th_sport));
+	printf("Dst port : %d\n", ntohs(tcph->th_dport));
 }
 
 void PrintData(const u_char* packet){
 	Data *Dt;
 	Dt=(Data *)packet;
 	printf("\n=====Data print=====\n");
-	for(int i=0; i<16; i++) printf("%02x ", Dt->Data[i]);
+	for(int i=0; i<16; i++){
+	       if(i==15) printf("%02x\n", Dt->Data[i]);
+	       else printf("%02x ", Dt->Data[i]);
+	}
 }
 

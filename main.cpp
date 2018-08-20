@@ -76,7 +76,7 @@ void PrintEthernet_H(const u_char* packet){
 	}
 	printf("Src Mac ");
 	for(int i=0; i<6; i++){
-		if(i==5) printf("%02x\n", eh->src[i]);
+		if(i==5) printf("%02x", eh->src[i]);
 		else printf("%02x:", eh->src[i]);
 	}	
 }
@@ -88,7 +88,7 @@ void PrintIp_H(const u_char* packet){
 	len=iph->ip_hl;
 	printf("\n===== IP Header =====\n");
 	printf("Src ip : %s\n", inet_ntoa(iph->ip_src)); 
-	printf("Dst ip : %s\n", inet_ntoa(iph->ip_dst));
+	printf("Dst ip : %s", inet_ntoa(iph->ip_dst));
 }
 
 void PrintTcp_H(const u_char* packet){
@@ -97,7 +97,7 @@ void PrintTcp_H(const u_char* packet){
 	t_len=tcph->th_off;
 	printf("\n===== TCP Header =====\n");
 	printf("Src port : %d\n", ntohs(tcph->th_sport));
-	printf("Dst port : %d\n", ntohs(tcph->th_dport));
+	printf("Dst port : %d", ntohs(tcph->th_dport));
 }
 
 void PrintData(const u_char* packet){

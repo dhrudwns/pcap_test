@@ -1,20 +1,4 @@
-
-
-
-
-
-
-
-
-
-
-
-
 #define ETHER_ADDR_LEN 6
-
-
-
-
 
 /*
  *  Ethernet II header
@@ -52,22 +36,6 @@ struct ethernet_hdr
 #define ETHERTYPE_LOOPBACK      0x9000  /* used to test interfaces */
 #endif
 
-struct libnet_ether_addr
-{
-    u_int8_t  ether_addr_octet[6];        /* Ethernet address */
-};
-
-/*
- *  Fiber Distributed Data Interface header
- *
- *  Static header size: 21 bytes (LLC and 48-bit address addr only)
- *
- *  Note: Organization field is 3 bytes which throws off the
- *        alignment of type.  Therefore fddi_type (19 bytes in) 
- *        is specified as two u_int8_ts.
- */
-
-
 /*
  *  IPv4 header
  *  Internet Protocol, version 4
@@ -75,14 +43,14 @@ struct libnet_ether_addr
  */
 struct ipv4_hdr
 {
-#if (LIBNET_LIL_ENDIAN)
-    u_int8_t ip_hl:4,      /* header length */
-           ip_v:4;         /* version */
-#endif
-#if (LIBNET_BIG_ENDIAN)
-    u_int8_t ip_v:4,       /* version */
-           ip_hl:4;        /* header length */
-#endif
+//#if (LIBNET_LIL_ENDIAN)
+	u_int8_t ip_h1:4,
+		 ip_v4:4;
+//#endif
+//#if (LIBNET_BIG_ENDIAN)
+//        u_int8_t ip_v:4, 
+//         	 ip_hl:4;     
+//#endif
     u_int8_t ip_tos;       /* type of service */
 #ifndef IPTOS_LOWDELAY
 #define IPTOS_LOWDELAY      0x10
@@ -187,4 +155,3 @@ struct tcp_hdr
     u_int16_t th_sum;         /* checksum */
     u_int16_t th_urp;         /* urgent pointer */
 };
-

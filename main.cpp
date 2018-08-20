@@ -15,13 +15,12 @@ struct Data
 	u_int16_t Data[16];
 };
 
-int i;
-u_int8_t protocol;
+u_int8_t protocol, len;
 u_int16_t t_len, type;
 
 int main(int argc, char* argv[]) {
   
-  char dev[] ="eth0";
+  char dev[] = "eth0"; 
   char errbuf[PCAP_ERRBUF_SIZE];
   pcap_t* handle = pcap_open_live(dev, 65535, 1, 1000, errbuf);
   if (handle == NULL) {
@@ -45,32 +44,35 @@ int main(int argc, char* argv[]) {
     packet+=14;
     PrintIp_H(packet);
     if(protocol==6)
-    packet+=t_len;
+    packet+=len*4;
     PrintTcp_H(packet);
+    }
     packet+=t_len;
     PrintData(packet);
-    }
-  }    
-    
-   
-}
+  }
+    pcap_close(handle);
+    return 0;
+  }
+      
+
 
 void PrintEthernet_H(const u_char* packet){
 	ethernet_hdr *eh;
 	eh =(ethernet_hdr *)packet;
 	type = eh->type;
 	printf("\n===== Ethernet Header =====\n");
-        printf("Dst Mac %02x:%02x:%02x:%02x:%02x:%02x \n", eh->dst[0], eh->dst[1], eh->dst[2], eh->dst[3], eh->dst[4], eh->dst[5]);
-	printf("Src Mac %02x:%02x:%02x:%02x:%02x:%02x \n", eh->src[0], eh->src[1], eh->src[2], eh->src[3], eh->src[4], eh->src[5]);
+        printf("Dst Mac %02x:%02x:%02x:%02x:%02x:%02x \n", eh->dst[0], eh->dst[1], eh->dst[2], eh->dst[3], eh->dst[4], eh->dst[5]);     
+       	printf("Src Mac %02x:%02x:%02x:%02x:%02x:%02x \n", eh->src[0], eh->src[1], eh->src[2], eh->src[3], eh->src[4], eh->src[5]);
 }
 
 void PrintIp_H(const u_char* packet){
 	ipv4_hdr *iph;
 	iph = (ipv4_hdr *)packet;
 	protocol = iph->ip_p;
-	t_len=iph->ip_len;
+	len=iph->ip_hl;
+	printf("dfdfdfdfdfdfdfdf%d\n\n", iph->ip_v);
 	printf("\n===== IP Header =====\n");
-	printf("Src ip : %s\n", inet_ntoa(iph->ip_src)); //ip주소를 문자열로 변환
+	printf("Src ip : %s\n", inet_ntoa(iph->ip_src)); 
 	printf("Dst ip : %s\n", inet_ntoa(iph->ip_dst));
 }
 
@@ -87,6 +89,6 @@ void PrintData(const u_char* packet){
 	Data *Dt;
 	Dt=(Data *)packet;
 	printf("\n=====Data print=====\n");
-	for(i=0; i<16; i++) printf("%02x ", Dt->Data[i]);
+	for(int i=0; i<16; i++) printf("%02x ", Dt->Data[i]);
 }
 

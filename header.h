@@ -44,8 +44,8 @@ struct ethernet_hdr
 struct ipv4_hdr
 {
 //#if (LIBNET_LIL_ENDIAN)
-	u_int8_t ip_h1:4,
-		 ip_v4:4;
+	u_int8_t ip_hl:4,
+		 ip_v:4;
 //#endif
 //#if (LIBNET_BIG_ENDIAN)
 //        u_int8_t ip_v:4, 

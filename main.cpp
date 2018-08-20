@@ -3,7 +3,7 @@
 #include <netinet/ip.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include "/root/pcap_test/header.h"
+#include "./header.h"
 
 void PrintEthernet_H(const u_char* packet);
 void PrintIp_H(const u_char* packet);

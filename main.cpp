@@ -39,15 +39,16 @@ int main(int argc, char* argv[]) {
 	    printf("%02x ", *(packet++));
     }*/
     PrintEthernet_H(packet);
-    if(type==8){
-    packet+=14;
-    PrintIp_H(packet);
-    if(protocol==6)
-    packet+=len*4;
-    PrintTcp_H(packet);
-    }
-    packet+=t_len;
-    PrintData(packet);
+    	if(type==8){
+   		 packet+=14;
+   		 PrintIp_H(packet);
+			 if(protocol==6){
+   		 		packet+=len*4;
+   		 		PrintTcp_H(packet);
+				packet+=t_len;
+				PrintData(packet);
+			 }
+	}
   }
     pcap_close(handle);
     return 0;
@@ -58,11 +59,16 @@ void PrintEthernet_H(const u_char* packet){
 	eh =(ethernet_hdr *)packet;
 	type = eh->type;
 	printf("\n===== Ethernet Header =====\n");
-	for(int i=0; i<6; i++) {
-		printf("Dst Mac %02x", eh->dst[i]);
+	printf("Dst Mac ");
+	for(int i=0; i<6; i++){
+	       if(i==5) printf("%02x\n", eh->dst[i]);
+	       else printf("%02x:", eh->dst[i]);
 	}
-        //printf("Dst Mac %02x:%02x:%02x:%02x:%02x:%02x \n", eh->dst[0], eh->dst[1], eh->dst[2], eh->dst[3], eh->dst[4], eh->dst[5]);     
-       //	printf("Src Mac %02x:%02x:%02x:%02x:%02x:%02x \n", eh->src[0], eh->src[1], eh->src[2], eh->src[3], eh->src[4], eh->src[5]);
+	printf("Src Mac ");
+	for(int i=0; i<6; i++){
+		if(i==5) printf("%02x\n", eh->src[i]);
+		else printf("%02x:", eh->src[i]);
+	}	
 }
 
 void PrintIp_H(const u_char* packet){
@@ -70,7 +76,6 @@ void PrintIp_H(const u_char* packet){
 	iph = (ipv4_hdr *)packet;
 	protocol = iph->ip_p;
 	len=iph->ip_hl;
-	printf("dfdfdfdfdfdfdfdf%d\n\n", iph->ip_hl);
 	printf("\n===== IP Header =====\n");
 	printf("Src ip : %s\n", inet_ntoa(iph->ip_src)); 
 	printf("Dst ip : %s\n", inet_ntoa(iph->ip_dst));

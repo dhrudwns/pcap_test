@@ -123,9 +123,16 @@ struct tcp_hdr
     u_int16_t th_sport;       /* source port */
     u_int16_t th_dport;       /* destination port */
     u_int32_t th_seq;          /* sequence number */
-    u_int32_t th_ack;          /* acknowledgement number */
+    u_int32_t th_ack;          /* acknowledgement number */ 
+//#if (LIBNET_LIL_ENDIAN)
     u_int8_t th_x2:4,         /* (unused) */
            th_off:4;        /* data offset */
+//#ndif
+//if (LIBNET_BIG_ENDIAN)
+// u_int 8_t th_off:4,
+//           th_x2:4;
+//endif
+
     u_int8_t  th_flags;       /* control flags */
 #ifndef TH_FIN
 #define TH_FIN    0x01      /* finished send data */

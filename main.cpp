@@ -17,6 +17,7 @@ struct Data
 
 u_int8_t protocol, len;
 u_int16_t t_len, type;
+u_int32_t p_len;
 
 void usage() {
 	printf("syntax: pcap_test <interface>\n");
@@ -43,7 +44,7 @@ int main(int argc, char* argv[]) {
     int res = pcap_next_ex(handle, &header, &packet);
     if (res == 0) continue;
     if (res == -1 || res == -2) break;
-    printf("%u bytes captured\n", header->caplen);
+    printf("\n%u bytes captured\n", header->caplen);
    /* for(i=0; i<header->len; i++){
 	    if(i%16==0) printf("\n");
 	    printf("%02x ", *(packet++));
@@ -56,6 +57,7 @@ int main(int argc, char* argv[]) {
    		 		packet+=len*4;
    		 		PrintTcp_H(packet);
 				packet+=t_len;
+				p_len=header->len;
 				PrintData(packet);
 			 }
 	}
@@ -104,9 +106,12 @@ void PrintData(const u_char* packet){
 	Data *Dt;
 	Dt=(Data *)packet;
 	printf("\n=====Data print=====\n");
-	for(int i=0; i<16; i++){
-	       if(i==15) printf("%02x\n", Dt->Data[i]);
-	       else printf("%02x ", Dt->Data[i]);
+	for(int i=0; i<p_len; i++){
+		if(i>=16) {
+			printf("\n");
+			break;
+		}
+			else printf("%02x ", Dt->Data[i]);
 	}
 }
 

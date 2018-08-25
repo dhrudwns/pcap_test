@@ -15,7 +15,7 @@ struct Data
 	u_int8_t Data[16];
 };
 
-u_int8_t protocol, len;
+u_int8_t protocol, ip_hl;
 u_int16_t t_len, type;
 u_int32_t p_len;
 
@@ -54,9 +54,9 @@ int main(int argc, char* argv[]) {
    		 packet+=14;
    		 PrintIp_H(packet);
 			 if(protocol==6){
-   		 		packet+=len*4;
+   		 		packet+=ip_hl*4;
    		 		PrintTcp_H(packet);
-				packet+=t_len;
+				packet+=t_len*4;
 				p_len=header->len;
 				PrintData(packet);
 			 }
@@ -67,9 +67,9 @@ int main(int argc, char* argv[]) {
   }
       
 void PrintEthernet_H(const u_char* packet){
-	ethernet_hdr *eh;
-	eh =(ethernet_hdr *)packet;
-	type = eh->type;
+        ethernet_hdr *eh;
+        eh =(ethernet_hdr *)packet;
+	type = eh-> type;
 	printf("\n===== Ethernet Header =====\n");
 	printf("Dst Mac ");
 	for(int i=0; i<6; i++){
@@ -87,7 +87,8 @@ void PrintIp_H(const u_char* packet){
 	ipv4_hdr *iph;
 	iph = (ipv4_hdr *)packet;
 	protocol = iph->ip_p;
-	len=iph->ip_hl;
+	ip_hl=iph->ip_hl;
+	p_len=iph->ip_len-(iph->ip_hl*4);
 	printf("\n===== IP Header =====\n");
 	printf("Src ip : %s\n", inet_ntoa(iph->ip_src)); 
 	printf("Dst ip : %s", inet_ntoa(iph->ip_dst));
@@ -97,6 +98,7 @@ void PrintTcp_H(const u_char* packet){
 	tcp_hdr *tcph;
 	tcph = (tcp_hdr *)packet;
 	t_len=tcph->th_off;
+	p_len-=(tcph->th_off*4);
 	printf("\n===== TCP Header =====\n");
 	printf("Src port : %d\n", ntohs(tcph->th_sport));
 	printf("Dst port : %d", ntohs(tcph->th_dport));
@@ -107,9 +109,12 @@ void PrintData(const u_char* packet){
 	Dt=(Data *)packet;
 	printf("\n=====Data print=====\n");
 	for(int i=0; i<p_len; i++){
-		if(i>=16) {
+		if(p_len>16) {
+			printf("%02x ", Dt->Data[i]);
+			if(i==15){
 			printf("\n");
 			break;
+			}
 		}
 			else printf("%02x ", Dt->Data[i]);
 	}

@@ -109,7 +109,5 @@ void PrintData(const u_char* packet){
 	Dt=(Data *)packet;
 	printf("\n=====Data print=====\n");
 	if(p_len>16) p_len=16;
-	for(int i=0; i<p_len; i++){
-		printf("%02x ", Dt->Data[i]);
-	}
+	for(int i=0; i<p_len; i++) printf("%02x ", Dt->Data[i]);
 }

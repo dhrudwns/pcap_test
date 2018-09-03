@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
 	    printf("%02x ", *(packet++));
     }*/
     PrintEthernet_H(packet);
-    	if(type==8){
+    	if(ntohs(type)==ETHERTYPE_IP){
    		 packet+=14;
    		 PrintIp_H(packet);
 			 if(protocol==6){

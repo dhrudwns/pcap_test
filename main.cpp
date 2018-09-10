@@ -3,6 +3,7 @@
 #include <netinet/ip.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#define LIBNET_LIL_ENDIAN 1
 #include "header.h"
 
 void PrintEthernet_H(const u_char* packet);

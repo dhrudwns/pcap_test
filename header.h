@@ -43,14 +43,14 @@ struct ethernet_hdr
  */
 struct ipv4_hdr
 {
-//#if (LIBNET_LIL_ENDIAN)
+#if (LIBNET_LIL_ENDIAN)
 	u_int8_t ip_hl:4,
 		 ip_v:4;
-//#endif
-//#if (LIBNET_BIG_ENDIAN)
-//        u_int8_t ip_v:4, 
-//         	 ip_hl:4;     
-//#endif
+#endif
+#if (LIBNET_BIG_ENDIAN)
+        u_int8_t ip_v:4, 
+         	 ip_hl:4;     
+#endif
     u_int8_t ip_tos;       /* type of service */
 #ifndef IPTOS_LOWDELAY
 #define IPTOS_LOWDELAY      0x10

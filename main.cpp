@@ -6,20 +6,6 @@
 #define LIBNET_LIL_ENDIAN 1
 #include "header.h"
 
-void PrintEthernet_H(const u_char* packet);
-void PrintIp_H(const u_char* packet);
-void PrintTcp_H(const u_char* packet);
-void PrintData(const u_char* packet);
-
-struct Data
-{
-	u_int8_t Data[16];
-};
-
-u_int8_t protocol, ip_hl;
-u_int16_t t_len, type;
-u_int32_t p_len;
-
 void usage() {
 	printf("syntax: pcap_test <interface>\n");
 	printf("sample: pcap_test wlan0\n");
@@ -43,6 +29,7 @@ int main(int argc, char* argv[]) {
     struct pcap_pkthdr* header; 
     const u_char* packet; 
     int res = pcap_next_ex(handle, &header, &packet);
+    int d_len;
     if (res == 0) continue;
     if (res == -1 || res == -2) break;
     printf("\n%u bytes captured\n", header->caplen);
@@ -50,65 +37,51 @@ int main(int argc, char* argv[]) {
 	    if(i%16==0) printf("\n");
 	    printf("%02x ", *(packet++));
     }*/
-    PrintEthernet_H(packet);
-    	if(ntohs(type)==ETHERTYPE_IP){
-   		 packet+=14;
-   		 PrintIp_H(packet);
-			 if(protocol==6){
-   		 		packet+=ip_hl*4;
-   		 		PrintTcp_H(packet);
-				packet+=t_len*4;
-				p_len=header->len;
-				PrintData(packet);
-			 }
-	}
+    struct ethernet_hdr *eh = (struct ethernet_hdr *)packet;
+    printf("\n===== Ethernet Header =====\n");
+    printf("Dst Mac ");
+    for(int i=0; i<6; i++)
+    {
+	    if(i==5) printf("%02x\n", eh->dst[i]);
+	    else printf("%02x:", eh->dst[i]);
+    }
+    printf("Src Mac ");
+    for(int i=0; i<6; i++)
+    {
+	    if(i==5) printf("%02x", eh->src[i]);
+	    else printf("%02x:", eh->src[i]);
+    }
+    if(ntohs(eh->type)==ETHERTYPE_IP)
+    {
+	    struct ipv4_hdr *iph = (struct ipv4_hdr *)(packet+sizeof(struct ethernet_hdr));
+	    printf("\n===== IP Header =====\n");
+	    printf("Src ip : %s\n", inet_ntoa(iph->ip_src));
+            printf("Dst ip : %s", inet_ntoa(iph->ip_dst));
+	    if(iph->ip_p==6)
+	    {
+		    struct tcp_hdr *tcph = (struct tcp_hdr *)((uint8_t*)iph+iph->ip_hl*4);
+	            printf("\n===== TCP Header =====\n");
+	            printf("Src port : %d\n", ntohs(tcph->th_sport));
+		    printf("Dst port : %d\n", ntohs(tcph->th_dport));
+		    d_len = ntohs(iph->ip_len)-(iph->ip_hl*4)-(tcph->th_off*4);
+		    uint8_t *data = (uint8_t*)tcph+tcph->th_off*4; 
+		    if(d_len>16) d_len=16;
+		    if(d_len>0 && d_len<=16){
+		    printf("\n===== Data =====\n");
+		    for(int i=0; i<d_len; i++){
+			    printf("%02x ", data[i]);
+		    }
+		    printf("\n");    
+		    }
+	    	    else printf("\n");
+	    }
+    }
   }
+   
+  
+	
+	
+  
     pcap_close(handle);
     return 0;
   }
-      
-void PrintEthernet_H(const u_char* packet){
-        ethernet_hdr *eh;
-        eh =(ethernet_hdr *)packet;
-	type = eh-> type;
-	printf("\n===== Ethernet Header =====\n");
-	printf("Dst Mac ");
-	for(int i=0; i<6; i++){
-	       if(i==5) printf("%02x\n", eh->dst[i]);
-	       else printf("%02x:", eh->dst[i]);
-	}
-	printf("Src Mac ");
-	for(int i=0; i<6; i++){
-		if(i==5) printf("%02x", eh->src[i]);
-		else printf("%02x:", eh->src[i]);
-	}	
-}
-
-void PrintIp_H(const u_char* packet){
-	ipv4_hdr *iph;
-	iph = (ipv4_hdr *)packet;
-	protocol = iph->ip_p;
-	ip_hl=iph->ip_hl;
-	p_len=iph->ip_len-(iph->ip_hl*4);
-	printf("\n===== IP Header =====\n");
-	printf("Src ip : %s\n", inet_ntoa(iph->ip_src)); 
-	printf("Dst ip : %s", inet_ntoa(iph->ip_dst));
-}
-
-void PrintTcp_H(const u_char* packet){
-	tcp_hdr *tcph;
-	tcph = (tcp_hdr *)packet;
-	t_len=tcph->th_off;
-	p_len-=(tcph->th_off*4);
-	printf("\n===== TCP Header =====\n");
-	printf("Src port : %d\n", ntohs(tcph->th_sport));
-	printf("Dst port : %d", ntohs(tcph->th_dport));
-}
-
-void PrintData(const u_char* packet){
-	Data *Dt;
-	Dt=(Data *)packet;
-	printf("\n=====Data print=====\n");
-	if(p_len>16) p_len=16;
-	for(int i=0; i<p_len; i++) printf("%02x ", Dt->Data[i]);
-}
